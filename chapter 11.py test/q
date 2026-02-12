@@ -1,0 +1,44 @@
+# Ready-to-run Seat Allocation Script
+
+# Input (hardcoded for testing)
+S, N, k, M = 100, 50, 5, 6
+blocks = [3, 10, 30, 5, 30, 22]
+
+# Identify dry/wet blocks: dry = even index (0,2,4,...), wet = odd index (1,3,5,...)
+block_types = ['dry' if i % 2 == 0 else 'wet' for i in range(M)]
+
+# Create a list of tuples: (block_size, block_type)
+seat_blocks = list(zip(blocks, block_types))
+
+# Expand blocks into individual seats
+seats = []
+for block_size, block_type in seat_blocks:
+    seats.extend([block_type] * block_size)
+
+# Allocate members
+members_left = N
+wet_allowed = k
+
+first_seat = None
+last_seat = None
+
+i = 0
+while members_left > 0 and i < len(seats):
+    if seats[i] == 'dry':
+        members_left -= 1
+        if first_seat is None:
+            first_seat = i
+        last_seat = i
+    else:  # wet seat
+        if wet_allowed > 0:
+            members_left -= 1
+            wet_allowed -= 1
+            if first_seat is None:
+                first_seat = i
+            last_seat = i
+    i += 1
+
+# Compute minimum distance
+distance = last_seat - first_seat
+print(distance)
+

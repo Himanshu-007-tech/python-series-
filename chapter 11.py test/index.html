@@ -1,0 +1,363 @@
+/*
+SolarIQ - Smart Solar Intelligence System
+Single-file React app scaffold (for Vite) with TailwindCSS + Outfit font
+
+Files provided below are intended to be pasted into a Vite React project.
+Quick setup:
+1) npm create vite@latest solariq -- --template react
+2) cd solariq
+3) npm install
+4) npm install -D tailwindcss postcss autoprefixer
+5) npx tailwindcss init -p
+6) Install extras: npm i @headlessui/react @heroicons/react supabase-js chart.js react-chartjs-2
+7) Update tailwind.config.js (see NOTE below)
+8) Replace src/main.jsx & src/App.jsx with the content below split as indicated.
+9) npm run dev
+
+This single code file contains multiple components: Button, Navbar, Hero, FeaturesSection,
+StatsSection, DashboardPreview, CTASection, Footer, and App wiring.
+
+Tailwind notes (tailwind.config.js):
+module.exports = {
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
+  theme: {
+    extend: {
+      colors: {
+        solar: {
+          50: '#fff8f1',
+          100: '#ffefe0',
+          300: '#ffb86b',
+          500: '#ff9800',
+          700: '#c66b00'
+        },
+        slate: {
+          900: '#0b1220'
+        },
+        eco: '#22c55e'
+      },
+      fontFamily: {
+        outfit: ['Outfit', 'ui-sans-serif', 'system-ui']
+      }
+    }
+  },
+  plugins: []
+}
+
+Add to index.html head:
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+---- START OF src/App.jsx ----
+*/
+import React, { useState, useEffect, useRef, forwardRef } from 'react'
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Tooltip } from 'chart.js'
+import { Line } from 'react-chartjs-2'
+import { MenuIcon, XIcon } from '@heroicons/react/outline'
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip)
+
+/* ------------------------- Button Component (fixed) ------------------------- */
+const buttonVariants = ({ variant = 'primary', size = 'md' } = {}) => {
+  const base = 'inline-flex items-center justify-center rounded-full font-semibold focus:outline-none transition-transform'
+  const variants = {
+    primary: 'bg-gradient-to-r from-solar-300 to-solar-500 text-slate-900 shadow-md hover:scale-[1.02] px-5',
+    secondary: 'bg-slate-900/60 border border-slate-700 text-slate-100 px-4',
+    ghost: 'bg-transparent text-slate-100 px-3'
+  }
+  const sizes = {
+    sm: 'py-1 text-sm',
+    md: 'py-2 text-base',
+    lg: 'py-3 text-lg'
+  }
+  return `${base} ${variants[variant] || variants.primary} ${sizes[size] || sizes.md}`
+}
+
+const Button = forwardRef(({ className = '', variant = 'primary', size = 'md', asChild = false, children, ...props }, ref) => {
+  const Comp = asChild && props.href ? 'a' : 'button'
+  return (
+    <Comp ref={ref} className={`${buttonVariants({ variant, size })} ${className}`} {...props}>
+      {children}
+    </Comp>
+  )
+})
+Button.displayName = 'Button'
+
+/* ------------------------- Navbar ------------------------- */
+const Navbar = () => {
+  const [open, setOpen] = useState(false)
+  return (
+    <header className="w-full py-4 px-6 flex items-center justify-between bg-transparent">
+      <div className="flex items-center gap-4">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-solar-300 to-solar-500 flex items-center justify-center shadow-lg text-slate-900 font-bold">☀</div>
+        <div>
+          <div className="font-semibold text-lg">SolarIQ</div>
+          <div className="text-xs text-slate-400">AI-powered Solar Intelligence</div>
+        </div>
+      </div>
+
+      <nav className="hidden md:flex items-center gap-6 text-slate-200">
+        <a className="hover:text-white">Features</a>
+        <a className="hover:text-white">Benefits</a>
+        <a className="hover:text-white">Dashboard</a>
+        <a className="hover:text-white">Contact</a>
+      </nav>
+
+      <div className="hidden md:flex gap-3">
+        <button className="text-sm text-slate-300 hover:text-white">Sign In</button>
+        <Button onClick={() => alert('Sign up flow')} size="md">Get Started</Button>
+      </div>
+
+      <div className="md:hidden">
+        <button onClick={() => setOpen(!open)} className="p-2 rounded-md bg-slate-900/40">
+          {open ? <XIcon className="w-5 h-5 text-white" /> : <MenuIcon className="w-5 h-5 text-white" />}
+        </button>
+      </div>
+
+      {open && (
+        <div className="absolute top-20 left-4 right-4 bg-slate-900/70 backdrop-blur-md rounded-xl p-4 md:hidden z-50">
+          <nav className="flex flex-col gap-3 text-slate-100">
+            <a>Features</a>
+            <a>Benefits</a>
+            <a>Dashboard</a>
+            <a>Contact</a>
+            <div className="flex gap-2 mt-3">
+              <button className="text-sm text-slate-300">Sign In</button>
+              <Button onClick={() => alert('Get Started')} size="md">Get Started</Button>
+            </div>
+          </nav>
+        </div>
+      )}
+    </header>
+  )
+}
+
+/* ------------------------- Hero ------------------------- */
+const Hero = () => {
+  return (
+    <section className="relative overflow-hidden py-16 px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+        <div>
+          <div className="inline-block px-3 py-1 rounded-full text-sm bg-solar-50 text-solar-700 mb-4 shadow-sm">AI-Powered Solar Intelligence</div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white leading-tight font-outfit">Smart Solar <span className="text-solar-300">Intelligence</span> System</h1>
+          <p className="mt-4 text-slate-300 max-w-xl">Combining advanced power forecasting with intelligent fault detection and anomaly explanation—helping solar operators reduce maintenance costs and minimize downtime through predictive insights and real-time diagnostics.</p>
+
+          <div className="mt-6 flex gap-3">
+            <Button onClick={() => alert('Start trial')} size="lg">Start Free Trial</Button>
+            <Button variant="secondary" size="lg" onClick={() => alert('Watch demo')}>Watch Demo</Button>
+          </div>
+
+          <div className="mt-8 text-slate-400">Trusted by leading operators: <span className="text-slate-200">SunPower • Enphase • SolarEdge • First Solar</span></div>
+        </div>
+
+        <div className="relative">
+          <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-2xl p-6 backdrop-blur-md shadow-2xl">
+            <div className="text-slate-200 font-medium">Dashboard Preview</div>
+            <div className="mt-4 bg-slate-900 rounded-lg p-4">
+              <MiniChart />
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-3 text-slate-300">
+              <div className="bg-slate-800/60 rounded p-3">Total: <div className="text-white font-semibold">847 kWh</div></div>
+              <div className="bg-slate-800/60 rounded p-3">Storage: <div className="text-white font-semibold">92%</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------- Mini chart for hero */
+const MiniChart = () => {
+  const labels = Array.from({ length: 12 }, (_, i) => `${i + 1}h`)
+  const data = {
+    labels,
+    datasets: [{ label: 'kWh', data: [65, 72, 80, 75, 85, 90, 88, 92, 95, 87, 78, 70], tension: 0.4, fill: true }]
+  }
+  return <Line data={data} options={{ plugins: { legend: { display: false } }, maintainAspectRatio: false }} height={180} />
+}
+
+/* ------------------------- Features Section ------------------------- */
+const features = [
+  { title: 'Power Forecasting', description: 'High-fidelity hourly and daily forecasts using weather & irradiance models.', color: 'primary' },
+  { title: 'Fault Detection', description: 'Residual-based and image-powered diagnostics to detect underperformance.', color: 'accent' },
+  { title: 'Anomaly Explanation', description: 'Explainable AI highlights probable root causes and recommended actions.', color: 'info' }
+]
+
+const FeaturesSection = () => {
+  return (
+    <section className="py-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center">
+          <h2 className="text-3xl font-bold text-white">Capabilities</h2>
+          <p className="mt-2 text-slate-300 max-w-2xl mx-auto">Our platform combines predictive analytics with diagnostic AI to deliver comprehensive solar intelligence that drives real business results.</p>
+        </div>
+
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+          {features.map((f) => (
+            <div key={f.title} className="p-6 rounded-xl bg-slate-900/50 border border-slate-800">
+              <div className="text-2xl font-semibold text-white mb-2">{f.title}</div>
+              <div className="text-slate-300">{f.description}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------- Stats Section (animated counters) ------------------------- */
+const AnimatedCounter = ({ target = 100, suffix = '+', duration = 1600 }) => {
+  const [count, setCount] = useState(0)
+  const ref = useRef()
+  useEffect(() => {
+    let start = 0
+    const steps = 60
+    const increment = target / steps
+    const iv = setInterval(() => {
+      start += increment
+      if (start >= target) {
+        setCount(Math.round(target))
+        clearInterval(iv)
+      } else setCount(Math.round(start))
+    }, duration / steps)
+    return () => clearInterval(iv)
+  }, [target, duration])
+  return <div className="text-3xl font-bold text-white">{count}{suffix}</div>
+}
+
+const StatsSection = () => {
+  return (
+    <section className="py-12 px-6 bg-gradient-to-b from-slate-900/30 to-transparent">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="p-6 rounded-xl bg-slate-900/40">
+          <div className="text-slate-300">Maintenance cost reduction</div>
+          <AnimatedCounter target={40} suffix={'%'} />
+          <div className="text-slate-400 text-sm mt-2">Average reduction within 90 days</div>
+        </div>
+        <div className="p-6 rounded-xl bg-slate-900/40">
+          <div className="text-slate-300">Forecast accuracy</div>
+          <AnimatedCounter target={95} suffix={'%'} />
+          <div className="text-slate-400 text-sm mt-2">Measured on historical test data</div>
+        </div>
+        <div className="p-6 rounded-xl bg-slate-900/40">
+          <div className="text-slate-300">Uptime improvement</div>
+          <AnimatedCounter target={8} suffix={'%'} />
+          <div className="text-slate-400 text-sm mt-2">Average availability lift</div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------- Dashboard Preview (rich mock) ------------------------- */
+const DashboardPreview = () => {
+  const metrics = [
+    { label: 'Generation', value: '847 kW', change: '+5.2%' },
+    { label: 'Storage', value: '92%', change: 'Charging' },
+    { label: 'Panel Temp', value: '42°C', change: 'Normal' },
+    { label: 'Efficiency', value: '97.3%', change: '+0.8%' }
+  ]
+
+  return (
+    <section className="py-12 px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2 p-6 rounded-2xl bg-slate-900/50">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-white font-semibold">Power Output Forecast — Next 24h</div>
+            <div className="text-slate-400">+12.4% vs yesterday</div>
+          </div>
+          <div className="h-64 bg-slate-800 rounded-lg p-4">
+            <MiniChart />
+          </div>
+
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            {metrics.map((m) => (
+              <div key={m.label} className="p-3 rounded bg-slate-800/60">
+                <div className="text-slate-300 text-sm">{m.label}</div>
+                <div className="text-white font-semibold">{m.value}</div>
+                <div className="text-slate-400 text-xs">{m.change}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <aside className="p-6 rounded-2xl bg-slate-900/40">
+          <div className="text-slate-200 font-semibold mb-3">System Status</div>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between"><div className="text-slate-300">Inverter A1</div><div className="text-emerald-400">Operational</div></div>
+            <div className="flex items-center justify-between"><div className="text-slate-300">Inverter B1</div><div className="text-amber-400">Warning</div></div>
+            <div className="flex items-center justify-between"><div className="text-slate-300">Grid Connection</div><div className="text-emerald-400">Operational</div></div>
+          </div>
+
+          <div className="mt-6">
+            <div className="text-slate-200 font-semibold mb-2">Recent Alerts</div>
+            <div className="text-slate-300 text-sm">Inverter B1 showing 3% efficiency drop. Possible dust accumulation.</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------- CTA Section ------------------------- */
+const CTASection = () => {
+  return (
+    <section className="py-12 px-6">
+      <div className="max-w-7xl mx-auto p-8 rounded-2xl bg-gradient-to-r from-slate-800/60 to-slate-900/60 backdrop-blur-md flex flex-col md:flex-row items-center justify-between gap-6">
+        <div>
+          <h3 className="text-2xl font-bold text-white">Ready to Optimize Your Solar Operations?</h3>
+          <p className="text-slate-300 mt-2">Join hundreds of operators who reduced costs and improved performance with SolarIQ. Start your free trial today.</p>
+        </div>
+        <div className="flex gap-3">
+          <Button size="lg" onClick={() => alert('Start trial')}>Start Free Trial</Button>
+          <Button variant="secondary" size="lg" onClick={() => alert('Schedule demo')}>Schedule Demo</Button>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------- Footer ------------------------- */
+const Footer = () => {
+  return (
+    <footer className="py-8 px-6 bg-slate-900/40 mt-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div>
+          <div className="font-semibold text-white">SolarIQ</div>
+          <div className="text-slate-400 text-sm">AI-powered solar intelligence for modern energy operations. Predict, detect, and optimize.</div>
+        </div>
+        <div className="flex gap-6">
+          <div>
+            <div className="text-slate-300 font-medium">Product</div>
+            <div className="text-slate-400 text-sm">Features • Pricing • API • Docs</div>
+          </div>
+          <div>
+            <div className="text-slate-300 font-medium">Company</div>
+            <div className="text-slate-400 text-sm">About • Careers • Partners</div>
+          </div>
+        </div>
+        <div>
+          <div className="text-slate-300 font-medium">Contact</div>
+          <div className="text-slate-400 text-sm">sales@solariq.io • +1 (888) 765-2749</div>
+        </div>
+      </div>
+      <div className="text-slate-500 text-sm text-center mt-6">© {new Date().getFullYear()} SolarIQ. All rights reserved.</div>
+    </footer>
+  )
+}
+
+/* ------------------------- App ------------------------- */
+export default function App() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-900 to-black text-slate-100 font-outfit">
+      <Navbar />
+      <main>
+        <Hero />
+        <FeaturesSection />
+        <StatsSection />
+        <DashboardPreview />
+        <CTASection />
+      </main>
+      <Footer />
+    </div>
+  )
+}
+
